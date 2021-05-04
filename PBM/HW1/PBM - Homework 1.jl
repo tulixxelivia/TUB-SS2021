@@ -74,7 +74,12 @@ md"""
 You can write your answer here or on paper.
 For inline LaTeX use `$\alpha$` and for multiline equations use three backticks: 
 
+solve as a Arithmetico–geometric sequence
+
+$p_T = Pr(t=T)=((1-q)q^{T-1}) = \frac{1}{5}q^T$
 ```math
+
+
 \begin{split}
 E[T] & = \sum_{1}^{\infty} T*Pr(t=T) \\
      & = \sum_{1}^{\infty}T (q^{T-1} (1-q)) \\
@@ -113,6 +118,9 @@ begin
 		## Until a 6 is obtained
 		## Use q the probability of not having a 6
 		## !! CODE MISSING !! ##
+		
+		# my solution
+		# see pT as a continus fall,then use Transformation of densities from MCM
 		Y = rand()
 		T = log(q,1-Y)
 		T = round(Int,T)
@@ -497,7 +505,7 @@ end
 # ╟─2249fb76-6085-42ed-9ac7-e9f594632920
 # ╟─76058486-5989-4872-8c2e-fb1e4f3e5737
 # ╟─73975a14-54e1-41d5-916e-4a3a49f28c31
-# ╟─23496edd-777a-438f-9fdd-581e53f324d2
+# ╠═23496edd-777a-438f-9fdd-581e53f324d2
 # ╟─655546c4-3723-44ab-a079-93e83597875e
 # ╟─329e2153-fbd4-4a04-9683-a92a9ceaf4c0
 # ╠═c531083e-92d4-11eb-2765-11c35a8b7327
