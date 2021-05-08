@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.3
+# v0.14.5
 
 using Markdown
 using InteractiveUtils
@@ -25,11 +25,12 @@ begin
 	default(linewidth = 3.0, legendfontsize = 15.0) # Some default values for our plotting
 	using Optim # Optimisation library
 	using PlutoUI # Some Pluto sugar
+	using Random
 end
 
 # ╔═╡ ec6f2a9d-f061-4cbb-8068-92e55b0af2a0
 md"""
-# Problem Sheet 1
+# Problem Sheet 1- With Solutions
 """
 
 # ╔═╡ 8b8eb682-bdd6-4100-b1f3-d71943a3114b
@@ -39,8 +40,11 @@ This will automatically install these packages in a local environment (where the
 If you would like to do that manually you can open a terminal with Julia and write `] add Distributions` for example
 """
 
-# ╔═╡ 23fc2bdb-5630-4067-842c-cbc1f28f1174
-#TableOfContents()
+# ╔═╡ 5c11d49f-2496-4317-a0fb-d741062fb311
+html"<button onclick=present()>Present</button>"
+
+# ╔═╡ ba25b4cc-b174-4f9f-b2bf-ca36d87f4f3b
+TableOfContents()
 
 # ╔═╡ 4ebaf836-35b1-4319-a4f8-b82ec90db952
 md"""
@@ -50,13 +54,27 @@ md"""
 # ╔═╡ 60148842-798b-416a-a908-99d4de9cf1f6
 md"""
 A dice is thrown repeatedly until it shows a $6$. Let $T$ be the
-number of throws for this to happen and $q$ the probability to **not** get a 6. Obviously, $T$ is a random
-variable.
+number of throws for this to happen. Obviously, $T$ is a random
+variable. 
 """
 
 # ╔═╡ 2249fb76-6085-42ed-9ac7-e9f594632920
 md"""
 ### (a) [MATH] Compute the expectation value $E[T]$ and the variance $V[T]$ of $T$.
+"""
+
+# ╔═╡ 1f0fab1c-c18c-42ac-be83-a74cffdbb9ab
+md"""
+- The probability for $t$ throws is given by the geometric
+    distribution
+    
+```math
+      P(T = t) = (1 - q) q^{t - 1}
+```
+
+with parameter $q = 5/6$.
+
+---
 """
 
 # ╔═╡ 76058486-5989-4872-8c2e-fb1e4f3e5737
@@ -69,32 +87,70 @@ q = let q_float=q_float
 	v[i]
 end
 
+# ╔═╡ bead2715-8a59-4866-a61d-897cf45f76f5
+scatter(0:50, x->pdf(Geometric(q_float), x); xlabel="T", ylabel="p(T)", label="p(x)", title="q = $(q)", ylims=(0,1))
+
+# ╔═╡ b40ee741-307f-43ea-a9c9-cb9538f8a83e
+md"""
+- The expectation value of $T$ can be calculated using its definition:
+
+```math
+      E[T] = \sum_{t=1}^{\infty} t P(T = t) = \sum_{t=1}^{\infty} (1 - q) t q^{t - 1} = \sum_{t = 1}^{\infty} (1 - q) \frac{d}{dq} q^t
+```
+
+- As the geometric series converges absolutely, we can exchange summation and derivation:
+    
+```math
+      E[T] = (1 - q) \frac{d}{dq} \sum_{t = 0}^{\infty} q^t = (1 - q)
+      \frac{d}{dq} \frac{1}{1 - q} = (1 - q) \frac{1}{(1 - q)^2} =
+      \frac{1}{1 - q}
+```
+"""
+
+# ╔═╡ bd008564-d7f3-4dd1-ac22-6b53d14ac1b4
+md"""
+- In order to obtain the variance we need the expectation value
+    of $T^2$, too:
+    
+```math
+      E[T^2] = \sum_{t = 1}^{\infty} \, t^2 \, P(T = t) = \sum_{t =
+        1}^{\infty} (1 - q) \, t^2 \, q^{t - 1}
+```
+
+- Here $t^2 \, q^{t - 1}$ is very similar to the second derivative of $q^{t + 1}$:
+    
+```math
+      E[T^2] = \sum_{t = 1}^{\infty} (1 - q) \, t (t + 1) q^{t - 1} -
+      \sum_{t = 1}^{\infty} (1 - q) t q^{t - 1} = -E[T] + \sum_{t =
+        1}^{\infty} (1 - q) \frac{d^2}{dq^2} \, q^{t + 1}
+```
+"""
+
 # ╔═╡ 23496edd-777a-438f-9fdd-581e53f324d2
 md"""
-You can write your answer here or on paper.
-For inline LaTeX use `$\alpha$` and for multiline equations use three backticks: 
-
-solve as a Arithmetico–geometric sequence
-
-$p_T = Pr(t=T)=((1-q)q^{T-1}) = \frac{1}{5}q^T$
+- Further simplifications
+    
 ```math
-
-
-\begin{split}
-E[T] & = \sum_{1}^{\infty} T*Pr(t=T) \\
-     & = \sum_{1}^{\infty}T (q^{T-1} (1-q)) \\
-     & = \frac{1}{5} \sum _{k=0}^{\infty }\:k\cdot \:q^k \\
-     & = 6
-\end{split}
+      E[T^2] = -\frac{1}{1 - q} + (1 - q) \frac{d^2}{dq^2} \sum_{t =
+        0}^{\infty} q^t = -\frac{1}{1 - q} + (1 - q) \frac{d^2}{dq^2}
+      \frac{1}{1 - q}
 ```
 
+lead to
+
 ```math
-\begin{split}
-V[T] & = E[T^2]-E[T]^2 \\
-     & = \frac{1}{5} \sum _{k=0}^{\infty }\:k^2\cdot \:q^k - 36 \\
-     & = 30
-\end{split}
+      E[T^2] = -\frac{1}{1 - q} + (1 - q) \frac{2}{(1 - q)^3} = \frac{1
+        + q}{(1 - q)^2}
 ```
+
+so that the variance of $T$ is given by
+
+```math
+      V[T] = E[T^2] - E[T]^2 = \frac{1 + q}{(1 - q)^2} -
+      \frac{1}{(1 - q)^2} = \frac{q}{(1 - q)^2}
+```
+
+- By substituting $q = 5/6$ we finally find $E[T] = 6$ and $V[T] = 30$.
 """
 
 # ╔═╡ 655546c4-3723-44ab-a079-93e83597875e
@@ -113,25 +169,29 @@ begin
 	var_T = zeros(N_tries) # Preallocation of the variance of T over time
 	for i in 1:N_tries
 		T = 1
-		## !! CODE MISSING !! ##
-		## Write here your code to run a random experiment where T increments
-		## Until a 6 is obtained
-		## Use q the probability of not having a 6
-		## !! CODE MISSING !! ##
-		
-		# my solution
-		# Pt is a sum of geometric serires,so can use transforamtion method
-		Y = rand()
-		T = log(q, (1-Y) )
-		T = round(Int,T)
+		while !rand(Bernoulli(1-q)) || T > 10000 # Sample from a Bernoulli with prob q until we get a 6
+			T += 1
+		end
 		T_vals[i] = T
 		expec_T[i] = mean(T_vals[1:i])
 		var_T[i] = var(T_vals[1:i])
 	end
-	x = 1:N_tries
-	plot(x, [expec_T, var_T]; label=["mean" "Variance"], xlabel="times", size=(400, 400))
+end;
 
-end
+# ╔═╡ c544453e-92d4-11eb-18ef-7b5986cf409e
+begin # Plot the expectation
+	p1 = plot(expec_T, label = "E[T]", legend=:bottomright) # Plot expectation over # of experiments
+	hline!([1/(1-q)], label = "$(Float64(1/(1-q)))") # Plot the value we expect to see
+end;
+
+# ╔═╡ c563b7f0-92d4-11eb-14b7-bb6e83170955
+begin # Plot the variance
+	p2 = plot(var_T, label = "V[T]", legend=:bottomright) # Plot the computed variance
+	hline!([q/(1-q)^2], label = "$(Float64(q/(1-q)^2))") # Plot the value we computed
+end;
+
+# ╔═╡ c5909664-92d4-11eb-1674-01f01535b18d
+plot(p1, p2, size = (700,300))
 
 # ╔═╡ 0aa93616-d88b-47ca-9c63-e8ec56334f58
 md"""
@@ -152,13 +212,19 @@ where the variance is defined as :
 \text{Var}(X) = E[(X-E[X])^2].
 ```
 
-!!! tip
-	Use the fact that for independent $U$ and $V$, $E[UV] = E[U]E[V]$
+**Hint:** Use the fact that for independent $U$ and $V$, $E[UV] = E[U]E[V]$
 """
 
 # ╔═╡ 47973f9c-aac2-4e65-a6f9-62d1c5d008fe
 md"""
-Write your answer here or on paper
+```math
+\begin{align}
+\text{Var}(X+Y) =& E[(X + Y - E[(X+Y)])^2] = E[(X - E[X] + Y - E[Y])^2]\\
+=& E[(X-E[X])^2] + 2E[(X-E[X])(Y-E[X])] + E[(Y-E[Y])^2]\\
+=& \text{Var}(X) + \text{Var}(Y) + 2 (E[XY] - 2 E[X]E[Y] + E[X]E[Y])\\
+=& \text{Var}(X) + \text{Var}(Y)
+\end{align}
+```
 """
 
 # ╔═╡ b09b58da-4119-4ba4-8daf-6ac95042a761
@@ -271,7 +337,25 @@ What is the probability density $q(y)$ of $Y$?
 
 # ╔═╡ fd5a989a-92ef-4c92-9f57-1148f6dc72fa
 md"""
-Write your answer here or on paper
+- Inverse function:
+
+```math
+\begin{eqnarray*}
+      y = \tan(\pi (x - 1/2))
+      &\Longleftrightarrow& \arctan y = \pi (x - 1/2) \\
+      &\Longleftrightarrow& x = \frac{1}{\pi} \arctan y + \frac{1}{2}
+\end{eqnarray*}
+```
+
+- Transformation of probability densities:
+
+```math
+\begin{align}
+      q(y) = p(x) \cdot \frac{dx}{dy} = p(x) \cdot \frac{1}{\pi}
+      \frac{1}{1 + y^2} = \frac{1}{\pi} \frac{1}{1 + y^2}
+\end{align}
+```
+- This transformation together with a (pseudo-)random number generator can be used to generate (pseudo-)random numbers with a standard Cauchy distribution.
 """
 
 # ╔═╡ 3614578a-90de-4886-a74a-dd5e5de23cdb
@@ -298,37 +382,86 @@ $\nu$ is a Gaussian noise variable independent of $V_1$ and of $V_2$ with $E[\nu
 
 # ╔═╡ 00981117-4391-4f92-a167-78509ec5cebd
 md"""
-!!! tip 
-	The following formula could be helpful: The inverse of the matrix
-	```math
-	\begin{eqnarray*}
-	{\bf A} = 
-	\left(\begin{array}{ccc}
-	a_{11} & a_{12} \\
-	a_{21} & a_{22}  \\
-	\end{array}\right)
-	\end{eqnarray*}
-	```
-	is given by
-	```math
-	\begin{eqnarray*}
-	{\bf A}^{-1} =
-	\frac{1}{\mbox{det}{{\bf A}}}\left(\begin{array}{ccc}
-	a_{22} & - a_{12} \\
-	-a_{21} & a_{11} \\
-	\end{array}\right)
-	\end{eqnarray*}
-	```
+The following formula could be helpful: The inverse of the matrix
+```math
+\begin{eqnarray*}
+{\bf A} = 
+\left(\begin{array}{ccc}
+a_{11} & a_{12} \\
+a_{21} & a_{22}  \\
+\end{array}\right)
+\end{eqnarray*}
+```
+is given by
+```math
+\begin{eqnarray*}
+{\bf A}^{-1} =
+\frac{1}{\mbox{det}{{\bf A}}}\left(\begin{array}{ccc}
+a_{22} & - a_{12} \\
+-a_{21} & a_{11} \\
+\end{array}\right)
+\end{eqnarray*}
+```
 """
 
 # ╔═╡ 649a3f0c-fc8a-4e9a-afc6-8b79d47a2079
 md"""
-### (a) Obtain the conditional densities $p(V | Y)$ from the joint densities $p(V, Y)$. (Here $V$ can be either $V_1$ or $V_2$) !
+### (a) We obtain the conditional densities $p(V | Y)$ from the joint densities $p(V, Y)$. (Here $V$ can be either $V_1$ or $V_2$) !
 """
 
 # ╔═╡ 871574bf-fe8d-4bf4-b36e-257c01be27be
 md"""
-Write your answers here or on paper
+```math
+\begin{align}
+p(V, Y) = \frac{1}{2\pi \sqrt{\det({\bf S}})} \exp\left\{-\frac{1}{2} (V, \; Y)^\top 
+{\bf S}^{-1} (V , \; Y)\right\}
+\end{align}
+```
+Note $(V , \; Y)$ is a two dimensional vector and the covariance matrix is given by
+```math
+\begin{align}
+{\bf S} = 
+\left(\begin{array}{ccc}
+E[V^2] & E[V   Y]\\
+E[V   Y] & E[Y^2] \\
+\end{array}\right)
+\end{align}
+```
+
+The expectations are
+```math
+\begin{eqnarray*}
+E[V_{1}   Y] & = & E[V_1 V_2] \\
+E[V_{2}   Y]  & =  & E[V_2^2]  \\
+E[ Y^2] & = & E[V_2^2] + E[\nu^2]
+\end{eqnarray*}
+```
+We set
+```math
+\begin{eqnarray*}
+{\bf S}^{-1} = \left(\begin{array}{ccc}
+({\bf S}^{-1})_{vv} & ({\bf S}^{-1})_{v y}\\
+({\bf S}^{-1})_{v y}& ({\bf S}^{-1})_{y y} \\
+\end{array}\right)
+\end{eqnarray*}
+```
+Then, from the joint density, we can write the conditional density as 
+```math
+p(V | Y) \propto \exp\left(- \frac{V^2}{2} ({\bf S}^{-1})_{vv} - V ({\bf S}^{-1})_{v y} Y\right)
+```
+- This can be written in the standard notation as
+```math
+p(V | Y) = \frac{1}{\sqrt{2\pi \sigma^2}} e^{\frac{(V- \mu)^2}{2\sigma^2}}
+```
+where
+```math
+\begin{eqnarray*}
+\mu  = E[ V | Y] = - \frac{({\bf S}^{-1})_{v y} Y}{({\bf S}^{-1})_{vv}}  \\
+\sigma^2 =  \mbox{VAR}[V | Y] = \frac{1}{({\bf S}^{-1})_{vv}} 
+\end{eqnarray*}
+```
+are the conditional mean and variance. We can use $E[ V | Y]$ for prediction.  
+$\mbox{VAR}[V | Y]$ would give us a measure for the error of such a prediction.
 """
 
 # ╔═╡ bb19ace8-968b-4f67-99c1-1f98a401b4f5
@@ -338,7 +471,50 @@ md"""
 
 # ╔═╡ c39a9874-622a-4310-b3b4-1c44f7fb33ea
 md"""
-Write your answers here or on paper
+- For $p(V_1|Y)$ we have 
+
+```math
+\begin{eqnarray*}
+{\bf S} = 
+\left(\begin{array}{ccc}
+16.6 &  6.4\\
+6.4 &  7.8 \\
+\end{array}\right)
+\end{eqnarray*}
+```
+and
+```math
+\begin{eqnarray*}
+{\bf S}^{-1} = 
+\left(\begin{array}{ccc}
+  0.0881  & -0.0723\\
+   -0.0723  &  0.1875\\
+\end{array}\right)
+\end{eqnarray*}
+```
+Hence $E[ V_1 | Y]= 0.8207$ and  $\mbox{VAR}[V_1 | Y] = 11.3507$.
+
+- For $p(V_2|Y)$ we have 
+```math
+\begin{eqnarray*}
+{\bf S} = 
+\left(\begin{array}{ccc}
+6.8 &  6.8\\
+6.8 &  7.8 \\
+\end{array}\right)
+\end{eqnarray*}
+```
+and
+```math
+\begin{eqnarray*}
+{\bf S}^{-1} = 
+\left(\begin{array}{ccc}
+  1.1471  & -1.0000 \\
+   -1.0000   & 1.0000 \\
+\end{array}\right)
+\end{eqnarray*}
+```
+Hence $E[ V_2 | Y]=0.8718$ and  $\mbox{VAR}[V_2 | Y] = 0.8718$.
 """
 
 # ╔═╡ 423e858a-2d93-46f8-8912-06ad3d251085
@@ -347,32 +523,31 @@ begin
 	S_V1V2 = [16.6 6.4
 	           6.4 6.8]
 	dV1V2 = MvNormal(S_V1V2)
-	scatter(eachrow(rand(dV1V2, 1000))..., title="Samples from V1, V2", xlabel="v1", ylabel="v2", msw=0.0, alpha=0.5, lab="p(v1, v2)", xlims=(-lim, lim), ylims=(-lim, lim))
+	scatter(eachrow(rand(dV1V2, 1000))..., msw = 0.0, alpha = 0.5, lab = "p(v1, v2)", xlims = (-lim, lim), ylims = (-lim, lim))
 end
 
-# ╔═╡ 1273c58d-808c-4389-acae-ef34e91d10e6
-md"""ν = $(@bind ν Slider(0.1:0.1:5; default=1.0, show_value=true))"""
-
-# ╔═╡ 81031818-568f-424d-a36a-bba7a7acc182
-md"""y = $(@bind y Slider(-10:0.1:10; default=1, show_value=true))"""
+# ╔═╡ e9b189b1-0625-49f0-9a13-caf64a4d0c7a
+md"""ν = $(@bind ν Slider(0.1:0.1:10; default=1, show_value=true))"""
 
 # ╔═╡ 2d26e182-b384-4936-b076-243f97bb8a68
 begin
 	S_V1Y = [16.6 6.4
-	          6.4 6.8 + ν]
+	          6.4 16.8 + ν]
 	dV1Y = MvNormal(S_V1Y)
 end
 
+# ╔═╡ b05934aa-a2d5-49aa-b337-198d31edb555
+md"""y = $(@bind y Slider(-10:0.1:10; default=1, show_value=true))"""
+
 # ╔═╡ ff731e78-92f3-11eb-042e-9febf37c372e
 begin
-	p3 = scatter(eachrow(rand(dV1Y, 1000))..., msw = 0.0, alpha = 0.5, lab = "p(v1, y)", lims = (-lim, lim))
-	hline!([y]; lab="Y=$y")
+	p3 = scatter(eachrow(rand(MersenneTwister(42), dV1Y, 1000))..., msw = 0.0, alpha = 0.5, lab = "p(v1, y)", lims = (-lim, lim))
+	hline!([y],lab = "Y = $(y)")
 	Sinv = inv(S_V1Y)
-	m_cond_Y = -Sinv[1, 2] / Sinv[1, 1] * y
-	var_cond_Y = 1 / Sinv[1, 1]
-	dV1_cond_Y = Normal(m_cond_Y, sqrt(var_cond_Y))
-	p4 = plot(-lim:0.01:lim, x->pdf(dV1_cond_Y, x), label = "p(v1 | y = $y)")
-	plot(p3,p4; layout=grid(2,1),size=(500, 800))
+	σ² = 1 / Sinv[1, 1] 
+	dV1_cond_Y = Normal(-σ² * Sinv[1, 2] * y, sqrt(σ²))
+	p4 = plot(-lim:0.01:lim, x->pdf(dV1_cond_Y,x), label = "p(v1 | y = $(y))")
+	plot(p3,p4; layout=grid(2,1))
 end
 
 # ╔═╡ 3fe9e12c-78e7-4f28-a2c6-251961c8a266
@@ -391,7 +566,14 @@ md"""
 
 # ╔═╡ 4c17255e-1a8e-4be2-8e19-015209eb5f74
 md"""
-Write your answers here or on paper
+One can redo the same derivation by adding $\theta$. This will lead to
+
+\begin{align}
+    Y = \theta + \tan(\pi(X-\frac{1}{2}))
+\end{align}
+
+One can generate uniform samples, using for instance a pseudo-random generator `rand()` in most programming languages. Then applying the transform from problem 3
+
 """
 
 # ╔═╡ 7943fda9-d780-4344-81f4-73d8db372e1e
@@ -401,7 +583,12 @@ md"""
 
 # ╔═╡ f5a7820b-f132-43cc-b4c6-55584c8ab792
 md"""
-Write your answers here or on paper
+The log likelihood for a dataset of $N$ independent points $y_i$ drawn from a cauchy distribution is given by :
+```math
+\begin{align}
+    \log p(D|\theta) = \sum_{i=1}^N \log p(y_i|\theta) = - N \log \pi - \sum \log(1+(y_i-\theta)^2)
+\end{align}
+```
 """
 
 # ╔═╡ f64bca87-c698-4200-90f3-0b1049ee5e23
@@ -412,9 +599,8 @@ md"""
 # ╔═╡ e5eb11ef-7371-4407-9583-619a9f4bc570
 # Generate a dataset D of Cauchy variables
 function generate_D(N, θ)
-	## !! CODE MISSING !! ##
-	## The function should return a vector of random Cauchy variables of size N
-	## !! CODE MISSING !! ##
+    u = rand(N)
+    ys = θ .- tan.(π * (u .- 0.5))
 end;
 
 # ╔═╡ 6feedfc0-92f4-11eb-1d74-eb8d1d088616
@@ -427,17 +613,13 @@ D = generate_D(1000, θ) # Generate the dataset;
 
 # ╔═╡ 7001fa4c-92f4-11eb-0d03-390aa7ff4014
 function log_likelihood(ys, θ) # Compute the loglikelihood
-	## !! CODE MISSING !! ##
-	## The function should return the total loglikelihood for the observations ys given the parameter θ
-	## !! CODE MISSING !! ##
+    - length(ys) * log(π) - sum(log(1.0 + (y - θ)^2) for y in ys)
 end;
 
 # ╔═╡ 700ff61a-92f4-11eb-33c3-ab7294c2efc2
 # We call optimize, from Optim.jl. Since we want to maximize
 # but optimize minimizes we give the negative value
-if D !== nothing
-	θML = optimize(x -> -log_likelihood(D, first(x)), [0.5], BFGS()).minimizer[1]
-end
+θML = optimize(x -> -log_likelihood(D, first(x)), [0.5], BFGS()).minimizer[1]
 
 # ╔═╡ ce38dfe0-259d-4aff-9e91-07735403b029
 md"""
@@ -452,16 +634,13 @@ end;
 
 # ╔═╡ 664327b4-92f5-11eb-05f2-5130953d617c
 begin
-	if D !== nothing
-		θs_ML = [ # Repeat the ML estimator M times
-			begin # This is a comprehension
-				## !! CODE MISSING !! ##
-				## Write here a function generating a random dataset and evaluating the ML estimator
-				## !! CODE MISSING !! ##
-			end
-		for _ in 1:M]
-		(mean = mean(θs_ML), variance = var(θs_ML))
-	end
+	θs_ML = [ # Repeat the ML estimator M times
+		begin # This is a comprehension
+			ys = generate_D(N, θ)
+			optimize(x -> -log_likelihood(ys, first(x)), [0.0], 		 BFGS()).minimizer[1]
+		end
+	for _ in 1:M]
+	(mean = mean(θs_ML), variance = var(θs_ML))
 end;
 
 # ╔═╡ 11368f32-92f6-11eb-0e4c-999edb341768
@@ -479,19 +658,16 @@ md"""
 begin
 	N_naive = 10000
 	M_naive = 10000
-	if D !== nothing
-		θs_naive = map(1:M) do _
-			## !! CODE MISSING !! ##
-			## Fill in here code generating a random dataset and evaluating the naive estimator
-			## !! CODE MISSING !! ## 
-		end
-		(mean = mean(θs_naive), variance = var(θs_naive))
+	θs_naive = map(1:M) do _
+	    ys = generate_D(1000, θ)
+	    return sum(ys)/N
 	end
+	(mean = mean(θs_naive), variance = var(θs_naive))
 end
 
 # ╔═╡ 1a4a4e57-9fe2-4481-a3bb-6f9a1dc297fc
 begin
-	histogram(θs_naive; title="Histogram of estimators", bins=20, lw=0.0, label="", xlabel="θₘₗ")
+	histogram(θs_naive; title="Histogram of estimators", bins=20, lw=0.0, label="", xlabel="θₙₐᵢᵥₑ")
 	vline!([θ], label="True value")
 end
 
@@ -499,26 +675,34 @@ end
 # ╟─ec6f2a9d-f061-4cbb-8068-92e55b0af2a0
 # ╟─8b8eb682-bdd6-4100-b1f3-d71943a3114b
 # ╠═5f64c654-3359-4f47-8179-e917a3e000bd
-# ╠═23fc2bdb-5630-4067-842c-cbc1f28f1174
+# ╟─5c11d49f-2496-4317-a0fb-d741062fb311
+# ╟─ba25b4cc-b174-4f9f-b2bf-ca36d87f4f3b
 # ╟─4ebaf836-35b1-4319-a4f8-b82ec90db952
 # ╟─60148842-798b-416a-a908-99d4de9cf1f6
 # ╟─2249fb76-6085-42ed-9ac7-e9f594632920
 # ╟─76058486-5989-4872-8c2e-fb1e4f3e5737
 # ╟─73975a14-54e1-41d5-916e-4a3a49f28c31
-# ╠═23496edd-777a-438f-9fdd-581e53f324d2
+# ╟─bead2715-8a59-4866-a61d-897cf45f76f5
+# ╟─1f0fab1c-c18c-42ac-be83-a74cffdbb9ab
+# ╟─b40ee741-307f-43ea-a9c9-cb9538f8a83e
+# ╟─bd008564-d7f3-4dd1-ac22-6b53d14ac1b4
+# ╟─23496edd-777a-438f-9fdd-581e53f324d2
 # ╟─655546c4-3723-44ab-a079-93e83597875e
 # ╟─329e2153-fbd4-4a04-9683-a92a9ceaf4c0
 # ╠═c531083e-92d4-11eb-2765-11c35a8b7327
+# ╟─c544453e-92d4-11eb-18ef-7b5986cf409e
+# ╟─c563b7f0-92d4-11eb-14b7-bb6e83170955
+# ╠═c5909664-92d4-11eb-1674-01f01535b18d
 # ╟─0aa93616-d88b-47ca-9c63-e8ec56334f58
 # ╟─bf7f4b27-029e-4522-a6b5-907bfc1ff1ca
 # ╟─47973f9c-aac2-4e65-a6f9-62d1c5d008fe
 # ╟─b09b58da-4119-4ba4-8daf-6ac95042a761
-# ╠═1b6b3b65-2b85-416f-8efe-53195a0ef107
+# ╟─1b6b3b65-2b85-416f-8efe-53195a0ef107
 # ╟─7f1f320d-0e93-4a4f-8c0a-529bb1d93271
 # ╟─8a1a1c34-92d6-11eb-36bd-b39e2962664a
 # ╟─8a1b12f6-92d6-11eb-0d8e-4d1861e4f6ed
-# ╠═7f85e534-1eec-471f-a65b-33515e73e1c5
-# ╠═84b928a6-dd93-486c-a3de-a47f48e1b893
+# ╟─7f85e534-1eec-471f-a65b-33515e73e1c5
+# ╟─84b928a6-dd93-486c-a3de-a47f48e1b893
 # ╠═8a6e1bfe-92d6-11eb-14a6-0108e90631ce
 # ╟─1b807c80-750e-41b2-ac10-0cdb2034f4bf
 # ╟─15b408a3-21e5-4d9a-b942-b1d99b7077d2
@@ -534,10 +718,10 @@ end
 # ╟─871574bf-fe8d-4bf4-b36e-257c01be27be
 # ╟─bb19ace8-968b-4f67-99c1-1f98a401b4f5
 # ╟─c39a9874-622a-4310-b3b4-1c44f7fb33ea
-# ╟─423e858a-2d93-46f8-8912-06ad3d251085
-# ╟─1273c58d-808c-4389-acae-ef34e91d10e6
-# ╟─81031818-568f-424d-a36a-bba7a7acc182
-# ╟─2d26e182-b384-4936-b076-243f97bb8a68
+# ╠═423e858a-2d93-46f8-8912-06ad3d251085
+# ╟─e9b189b1-0625-49f0-9a13-caf64a4d0c7a
+# ╠═2d26e182-b384-4936-b076-243f97bb8a68
+# ╟─b05934aa-a2d5-49aa-b337-198d31edb555
 # ╟─ff731e78-92f3-11eb-042e-9febf37c372e
 # ╟─3fe9e12c-78e7-4f28-a2c6-251961c8a266
 # ╟─a58f60b2-6b84-40ca-a9b5-93f0a28de5e7
@@ -556,4 +740,4 @@ end
 # ╠═11368f32-92f6-11eb-0e4c-999edb341768
 # ╟─13fc672f-e714-4bc9-a0c4-abd7b8b96103
 # ╠═62421494-8697-480d-b756-bb7538a0d7ea
-# ╠═1a4a4e57-9fe2-4481-a3bb-6f9a1dc297fc
+# ╟─1a4a4e57-9fe2-4481-a3bb-6f9a1dc297fc
