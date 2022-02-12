@@ -34,6 +34,10 @@ https://de.sandro-paris.com/de/damen/blousons-%26-jacken/tweedjacke/SFPVE00650.h
 
 https://de.sandro-paris.com/de/damen/blousons-%26-jacken/oversize-jacke-mit-strasssteinen/SFPBL00496.html?dwvar_SFPBL00496_color=20#start=1
 
+https://www.ganni.com/us/oversized-isoli-pullover-T3123.html?dwvar_T3123_color=Heather
+
+https://www.ambushdesign.com/en-de/shopping/fleece-workshop-crewneck-16877434
+
 https://www.ssense.com/en-de/women/product/acne-studios/pink-logo-t-shirt/8802691
 
 https://www.r13denim.com/collections/sale/products/drop-neck-combo
